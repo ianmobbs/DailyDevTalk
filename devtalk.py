@@ -16,7 +16,7 @@ from collections import Counter			# Used vectorize tweets
 # Tokens to access Twitter API
 # from keys import consumer_key, consumer_secret, access_token, access_token_secret
 
-# Tokens access from Heroku environment
+# Token access from Heroku environment
 consumer_key = ENV['consumer_key']
 consumer_secret = ENV['consumer_secret']
 access_token = ENV['access_token']
@@ -46,7 +46,7 @@ class DailyDevTalk(tweepy.StreamListener):
 		return Counter(words)
 
 	# Finds the cosine similarity of two tweets
-	# TODO: Use hashmap of tweets with their sums
+	# TODO: Use hashmap of tweets with their vector sums
 	# http://stackoverflow.com/questions/15173225/how-to-calculate-cosine-similarity-given-2-sentence-strings-python
 	def compare_tweets(self, vec1, vec2):
 		intersection = set(vec1.keys()) & set(vec2.keys())
@@ -64,7 +64,7 @@ class DailyDevTalk(tweepy.StreamListener):
 			return float(numerator) / denominator
 		
 	# Finds previous 100 tweets
-	# TODO: Cache tweets every hours
+	# TODO: Cache tweets every day
 	def get_previous_tweets(self):
 		print("Found previous tweets")
 		return tweepy.Cursor(self.api.search, q="#DevTalk").items(100)
@@ -95,16 +95,19 @@ class DailyDevTalk(tweepy.StreamListener):
 
 	# Follows, retweets, and favorites tweets using the #DevTalk hashtags
 	def on_status(self, status):
-		retweet = status.text[0:2] == 'RT'
-		self_post = status.author.screen_name == 'DailyDevTalk'
-		if not any((retweet, self_post)):
+		break_conditions = [
+			status.text[0:2] == 'RT',
+			status.author.screen_name == 'DailyDevTalk'
+		]
+		if not any(break_conditions):
 			print("Received tweet")
 			# Follow user
 			self.api.create_friendship(status.author.screen_name)
 			# Favorite tweet
 			self.api.create_favorite(status.id)
 			# Retweet tweet
-			self.api.retweet(status.id)
+			# TODO: Only retweet notable tweets
+			# self.api.retweet(status.id)
 			# Match up with user by tweet text
 			self.match_tweet(status)
 
