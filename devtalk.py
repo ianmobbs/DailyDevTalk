@@ -28,7 +28,7 @@ class DailyDevTalk(tweepy.StreamListener):
 	def start(self):
 		print("Streaming")
 		stream = tweepy.Stream(auth = self.api.auth, listener=DailyDevTalk())
-		stream.filter(track=['#DevTalk', '#devtalk'], async="true")
+		stream.filter(track=['#DevTalk'], async="true")
 
 	# Returns a counter of all words found in a tweet
 	# TODO: Remove common words and #DevTalk hashtag
