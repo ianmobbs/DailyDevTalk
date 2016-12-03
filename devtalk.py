@@ -10,6 +10,7 @@
 # Imports
 import tweepy						# Required to interface with Twitter
 import re, math 					# Used to compare tweets
+from os import environ as ENV 		# Used for environment variables
 from collections import Counter			# Used vectorize tweets
 
 # Tokens to access Twitter API
