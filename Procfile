@@ -1,1 +1,1 @@
-worker: devtalk.py
+worker: python devtalk.py
