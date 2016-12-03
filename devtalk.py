@@ -13,7 +13,13 @@ import re, math 					# Used to compare tweets
 from collections import Counter			# Used vectorize tweets
 
 # Tokens to access Twitter API
-from keys import consumer_key, consumer_secret, access_token, access_token_secret
+# from keys import consumer_key, consumer_secret, access_token, access_token_secret
+
+# Tokens access from Heroku environment
+consumer_key = ENV['consumer_key']
+consumer_secret = ENV['consumer_secret']
+access_token = ENV['access_token']
+access_token_secret = ENV['access_token_secret']
 
 # DailyDevTalk class
 class DailyDevTalk(tweepy.StreamListener):
