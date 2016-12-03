@@ -10,7 +10,7 @@
 # Imports
 import tweepy						# Required to interface with Twitter
 import re, math 					# Used to compare tweets
-from collections import Counter		# Used vectorize tweets
+from collections import Counter			# Used vectorize tweets
 
 # Tokens to access Twitter API
 from keys import consumer_key, consumer_secret, access_token, access_token_secret

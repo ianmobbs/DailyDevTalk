@@ -13,5 +13,7 @@ The system is currently very much a work-in-progress and is very inefficient. He
  - Create hashmap of tweets on retrieval with vector sum
  - Remove common words from Tweet vectors (if, then, the, etc.)
 
+I also eventually hope to implement a system that measures semantic similarity (as opposed to just surface similarity) through natural language processing.
+
 ## Documentation
 Coming soon!
