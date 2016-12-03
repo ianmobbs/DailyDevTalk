@@ -11,6 +11,7 @@ The system is currently very much a work-in-progress and is very inefficient. He
  - Store old tweets every hour
  - Exclude tweets by same author
  - Create hashmap of tweets on retrieval with vector sum
+ - Remove common words from Tweet vectors (if, then, the, etc.)
 
 ## Documentation
 Coming soon!

@@ -7,31 +7,40 @@
 # 	- Exclude tweets by same author
 # 	- Create hashmap of tweets on retrieval with vector sum
 
-import tweepy
-import re, math
-from collections import Counter
+# Imports
+import tweepy						# Required to interface with Twitter
+import re, math 					# Used to compare tweets
+from collections import Counter		# Used vectorize tweets
+
+# Tokens to access Twitter API
 from keys import consumer_key, consumer_secret, access_token, access_token_secret
 
-
+# DailyDevTalk class
 class DailyDevTalk(tweepy.StreamListener):
+	# Connects to Twitter API
 	def __init__(self):
 		print("Initialized")
 		auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 		auth.set_access_token(access_token, access_token_secret)
 		self.api = tweepy.API(auth)
 
+	# Starts searching for #DevTalk tweets
 	def start(self):
 		print("Streaming")
 		stream = tweepy.Stream(auth = self.api.auth, listener=DailyDevTalk())
 		stream.filter(track=['#DevTalk', '#devtalk'], async="true")
 
-
+	# Returns a counter of all words found in a tweet
+	# TODO: Remove common words and #DevTalk hashtag
 	def tweet_to_vector(self, text):
 		WORD = re.compile(r'\w+')
 		words = WORD.findall(text)
 		print("Compared vector")
 		return Counter(words)
 
+	# Finds the cosine similarity of two tweets
+	# TODO: Use hashmap of tweets with their sums
+	# http://stackoverflow.com/questions/15173225/how-to-calculate-cosine-similarity-given-2-sentence-strings-python
 	def compare_tweets(self, vec1, vec2):
 		intersection = set(vec1.keys()) & set(vec2.keys())
 		numerator = sum([vec1[x] * vec2[x] for x in intersection])
@@ -47,11 +56,13 @@ class DailyDevTalk(tweepy.StreamListener):
 		else:
 			return float(numerator) / denominator
 		
-
+	# Finds previous 100 tweets
+	# TODO: Cache tweets every hours
 	def get_previous_tweets(self):
 		print("Found previous tweets")
 		return tweepy.Cursor(self.api.search, q="#DevTalk").items(100)
-	
+
+	# Finds and returns most similar tweets
 	def get_most_similar_tweet(self, tweet):
 		most_similar_tweet = None
 		most_similar_tweet_similarity = 0
@@ -68,12 +79,14 @@ class DailyDevTalk(tweepy.StreamListener):
 		else:
 			return None, None
 
+	# Matches two tweets and connects the users
 	def match_tweet(self, tweet):
 		most_similar_tweet, most_similar_tweet_similarity = self.get_most_similar_tweet(tweet.text)
 		if most_similar_tweet is not None:
 			self.api.update_status("@{3} It looks like @{0} is talking about this too! ({1:0.2f}% similarity) {2}".format(most_similar_tweet.author.screen_name, most_similar_tweet_similarity * 100, "http://twitter.com/%s/status/%s" % (most_similar_tweet.author.screen_name, most_similar_tweet.id), tweet.author.screen_name), in_reply_to_status_id=tweet.id)
 		print("Matched tweet")
 
+	# Follows, retweets, and favorites tweets using the #DevTalk hashtags
 	def on_status(self, status):
 		retweet = status.text[0:2] == 'RT'
 		self_post = status.author.screen_name == 'DailyDevTalk'
@@ -90,6 +103,7 @@ class DailyDevTalk(tweepy.StreamListener):
 
 
 def main():
+	# Runs the DailyDevTalk bot
 	listener = DailyDevTalk()
 	listener.start()
 
