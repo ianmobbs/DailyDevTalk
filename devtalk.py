@@ -26,6 +26,10 @@ access_token_secret = ENV['access_token_secret']
 class DailyDevTalk(tweepy.StreamListener):
 	# Connects to Twitter API
 	def __init__(self):
+		self.searches = [
+			"#DevTalk",
+			"#DevDiscuss",
+		]
 		print("Initialized")
 		auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 		auth.set_access_token(access_token, access_token_secret)
@@ -35,13 +39,16 @@ class DailyDevTalk(tweepy.StreamListener):
 	def start(self):
 		print("Streaming")
 		stream = tweepy.Stream(auth = self.api.auth, listener=DailyDevTalk())
-		stream.filter(track=['#DevTalk'], async="true")
+		stream.filter(track=self.searches, async="true")
 
 	# Returns a counter of all words found in a tweet
-	# TODO: Remove common words and #DevTalk hashtag
+	# TODO: Remove links and usernames from Tweet text
 	def tweet_to_vector(self, text):
 		WORD = re.compile(r'\w+')
 		words = WORD.findall(text)
+		ignored_words = ["the", "be", "to", "of", "and", "a", "in", "that", "have", "i", "it", "for", "not", "on", "with", "as", "do", "at", "devtalk", "devdiscuss", "rt"]
+		counted_words = [word for word in words if word not in ignored_words]
+		print(counted_words)
 		print("Compared vector")
 		return Counter(words)
 
@@ -65,9 +72,9 @@ class DailyDevTalk(tweepy.StreamListener):
 		
 	# Finds previous 100 tweets
 	# TODO: Cache tweets every day
-	def get_previous_tweets(self):
+	def get_previous_tweets(self): 
 		print("Found previous tweets")
-		return tweepy.Cursor(self.api.search, q="#DevTalk").items(100)
+		return tweepy.Cursor(self.api.search, q=" OR ".join(self.searches)).items(100)
 
 	# Finds and returns most similar tweets
 	def get_most_similar_tweet(self, tweet):
@@ -90,7 +97,14 @@ class DailyDevTalk(tweepy.StreamListener):
 	def match_tweet(self, tweet):
 		most_similar_tweet, most_similar_tweet_similarity = self.get_most_similar_tweet(tweet.text)
 		if most_similar_tweet is not None:
-			self.api.update_status("@{3} It looks like @{0} is talking about this too! ({1:0.2f}% similarity) {2}".format(most_similar_tweet.author.screen_name, most_similar_tweet_similarity * 100, "http://twitter.com/%s/status/%s" % (most_similar_tweet.author.screen_name, most_similar_tweet.id), tweet.author.screen_name), in_reply_to_status_id=tweet.id)
+			break_conditions = [
+				most_similar_tweet.author == tweet.author,
+				most_similar_tweet.author == 'DailyDevTalk',
+				tweet.author == 'DailyDevTalk',	
+			]
+			if not any(break_conditions):
+				self.api.update_status("@{3} It looks like @{0} is talking about this too! ({1:0.2f}% similarity) {2}".format(most_similar_tweet.author.screen_name, most_similar_tweet_similarity * 100, "http://twitter.com/%s/status/%s" % (most_similar_tweet.author.screen_name, most_similar_tweet.id), tweet.author.screen_name), in_reply_to_status_id=tweet.id)
+		
 		print("Matched tweet")
 
 	# Follows, retweets, and favorites tweets using the #DevTalk hashtags
@@ -107,7 +121,7 @@ class DailyDevTalk(tweepy.StreamListener):
 			self.api.create_favorite(status.id)
 			# Retweet tweet
 			# TODO: Only retweet notable tweets
-			# self.api.retweet(status.id)
+			#self.api.retweet(status.id)
 			# Match up with user by tweet text
 			self.match_tweet(status)
 

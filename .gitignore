@@ -1,3 +1,5 @@
 keys.py
 *.pyc
 .DS_Store
+*.txt
+gettweets.py

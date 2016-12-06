@@ -9,9 +9,8 @@ Every time the system receives a tweet, it looks at the last 100 tweets using th
 ## Improvements
 The system is currently very much a work-in-progress and is very inefficient. Here is a (continuously updated) list of improvements to be made:
  - Store old tweets every hour
- - Exclude tweets by same author
  - Create hashmap of tweets on retrieval with vector sum
- - Remove common words from Tweet vectors (if, then, the, etc.)
+ - Remove usernames and links from counters
  - Create new status objects that strip unnecessary information to reduce server load
 
 I also eventually hope to implement a system that measures semantic similarity (as opposed to just surface similarity) through natural language processing.
